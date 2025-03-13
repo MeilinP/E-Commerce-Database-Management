@@ -1,70 +1,71 @@
 from db import get_db
+from crud import create_user, get_user
 from crud import create_product, get_product, get_all_products, update_product_stock, delete_product
 from crud import create_order, get_order, get_orders_by_user, update_order_status, delete_order
-from crud import create_user, create_product, create_order, get_orders_by_user
+
 # Get a database session
 db = next(get_db())
 
-# ✅ Create a User before placing an order
-print("\nCreating User...")
-user = create_user(db, "Alice Johnson", "alice@example.com", "securepassword")
-print("✅ User Created:", user)
+# ✅ Ensure User Exists Before Creating Order
+test_email = "testuser@example.com"
+test_name = "Test User"
+test_password = "testpassword123"
 
-# ✅ Create a Product
-print("\nCreating Product...")
-product = create_product(db, "Laptop", "Powerful laptop", 999.99, 10, "Electronics")
+print("\nChecking if test user exists...")
+user = get_user(db, 1)  # Try fetching user ID 1
+if not user:
+    print("Creating Test User...")
+    user = create_user(db, test_name, test_email, test_password)
+    print("✅ User Created:", user)
+else:
+    print(f"⚠️ User ID {user.user_id} already exists. Using it for testing.")
+
+# ✅ Test Create Product
+print("\nCreating Test Product...")
+product = create_product(db, "Test Laptop", "Test description", 999.99, 5, "Test Category")
 print("✅ Product Created:", product)
 
-# ✅ Now Create an Order using the actual user_id
-print("\nCreating Order...")
-order = create_order(db, user_id=user.user_id, items=[{"product_id": product.product_id, "quantity": 2, "price": product.price}])
-print("✅ Order Created:", order)
-# Test Create Product
-print("Creating Product...")
-product = create_product(db, "Laptop", "Powerful laptop", 999.99, 10, "Electronics")
-print("✅ Product Created:", product)
-
-# Test Get Product
+# ✅ Test Get Product
 print("\nFetching Product by ID...")
 fetched_product = get_product(db, product.product_id)
 print("✅ Product Fetched:", fetched_product)
 
-# Test Get All Products
+# ✅ Test Get All Products
 print("\nFetching All Products...")
 products = get_all_products(db)
-print("✅ All Products:", products)
+print("✅ All Products Count:", len(products))
 
-# Test Update Product Stock
+# ✅ Test Update Product Stock
 print("\nUpdating Product Stock...")
-updated_product = update_product_stock(db, product.product_id, 5)
-print("✅ Updated Product:", updated_product)
+updated_product = update_product_stock(db, product.product_id, 10)
+print("✅ Updated Product Stock:", updated_product)
 
-# Test Delete Product
+# ✅ Test Delete Product
 print("\nDeleting Product...")
 delete_status = delete_product(db, product.product_id)
 print("✅ Product Deleted:", delete_status)
 
-# Test Create Order
-print("\nCreating Order...")
-order = create_order(db, user_id=1, items=[{"product_id": 1, "quantity": 2, "price": 999.99}])
+# ✅ Test Create Order (Now using a valid user)
+print("\nCreating Test Order...")
+order = create_order(db, user.user_id, items=[{"product_id": product.product_id, "quantity": 2, "price": 999.99}])
 print("✅ Order Created:", order)
 
-# Test Get Order
+# ✅ Test Get Order
 print("\nFetching Order by ID...")
 fetched_order = get_order(db, order.order_id)
 print("✅ Order Fetched:", fetched_order)
 
-# Test Get All Orders for a User
+# ✅ Test Get All Orders for User
 print("\nFetching Orders for User ID 1...")
-orders = get_orders_by_user(db, 1)
-print("✅ User Orders:", orders)
+orders = get_orders_by_user(db, user.user_id)
+print("✅ User Orders Count:", len(orders))
 
-# Test Update Order Status
+# ✅ Test Update Order Status
 print("\nUpdating Order Status...")
 updated_order = update_order_status(db, order.order_id, "shipped")
 print("✅ Updated Order:", updated_order)
 
-# Test Delete Order
+# ✅ Test Delete Order
 print("\nDeleting Order...")
 delete_status = delete_order(db, order.order_id)
 print("✅ Order Deleted:", delete_status)

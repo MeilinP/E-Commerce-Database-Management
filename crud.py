@@ -3,7 +3,7 @@ from models import User
 from werkzeug.security import generate_password_hash
 from models import Product
 from models import Order, OrderItem
-
+from config import SessionLocal  # ✅ Import SessionLocal to use in functions
 # Create a new user
 def create_user(db: Session, name: str, email: str, password: str):
     hashed_password = generate_password_hash(password)
@@ -68,6 +68,13 @@ def delete_product(db: Session, product_id: int):
 
 # Create a new order
 def create_order(db: Session, user_id: int, items: list):
+    print(f"Checking user_id: {user_id}")  # Debugging
+    user_exists = db.query(User).filter(User.user_id == user_id).first()
+    
+    if not user_exists:
+        print(f"ERROR: User ID {user_id} not found!")
+        return {"error": "User not found"}
+
     total_amount = sum(item["quantity"] * item["price"] for item in items)
     new_order = Order(user_id=user_id, total_amount=total_amount, status="pending")
     db.add(new_order)
@@ -79,6 +86,7 @@ def create_order(db: Session, user_id: int, items: list):
         db.add(order_item)
 
     db.commit()
+    print(f"Order {new_order.order_id} placed successfully!")
     return new_order
 # Fetch an order by ID
 def get_order(db: Session, order_id: int):
@@ -98,7 +106,11 @@ def update_order_status(db: Session, order_id: int, new_status: str):
 def delete_order(db: Session, order_id: int):
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if order:
+        db.query(OrderItem).filter(OrderItem.order_id == order_id).delete()  # ✅ Delete items first
         db.delete(order)
         db.commit()
         return True
     return False
+# Fetch all orders
+def get_orders(db: Session):
+    return db.query(Order).all()
