@@ -5,7 +5,9 @@ This is a full-stack **E-Commerce Management System** that allows **customers** 
 - **Flask API (Backend)**: Handles database operations and business logic.
 - **PostgreSQL Database**: Stores user, product, and order data.
 - **Streamlit Apps (Admin & Customer)**: Provides user-friendly interfaces for customers and admins.
-
+## Demo Videos
+https://www.youtube.com/watch?v=V5b0X11nLyo
+https://www.youtube.com/watch?v=udleMgLzNh0
 ---
 
 ## Features
